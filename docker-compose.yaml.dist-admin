@@ -1,0 +1,32 @@
+version: "3.5"
+services:
+  mongo:
+    container_name: "mongo-db"
+    image: mongo:4.2
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./docker/.volumes/mongo/data/db:/data/db
+      - ./docker/.volumes/mongo/data/configdb:/data/configdb
+    command: "--noauth"
+
+  mongo-express:
+    container_name: "mongo-express"
+    image: mongo-express:0.54
+    restart: on-failure
+    depends_on:
+      - mongo
+
+  nginx:
+    container_name: "mongo-nginx"
+    build:
+      context: docker/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - mongo-express
+    volumes:
+      - ./project:/var/project
+      - ./docker/.volumes/log:/var/log
